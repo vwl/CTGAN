@@ -181,7 +181,7 @@ class CTGANSynthesizer(BaseSynthesizer):
         """Apply proper activation function to the output of the generator."""
         data_t = []
         st = 0
-        for column_info in self._transformer.output_info_list:
+        for column_info in self.transformer.output_info_list:
             for span_info in column_info:
                 if span_info.activation_fn == 'tanh':
                     ed = st + span_info.dim
@@ -202,7 +202,7 @@ class CTGANSynthesizer(BaseSynthesizer):
         loss = []
         st = 0
         st_c = 0
-        for column_info in self._transformer.output_info_list:
+        for column_info in self.transformer.output_info_list:
             for span_info in column_info:
                 if len(column_info) != 1 or span_info.activation_fn != "softmax":
                     # not discrete column
@@ -271,17 +271,17 @@ class CTGANSynthesizer(BaseSynthesizer):
                 DeprecationWarning
             )
 
-        self._transformer = DataTransformer()
-        self._transformer.fit(train_data, discrete_columns)
+        self.transformer = DataTransformer()
+        self.transformer.fit(train_data, discrete_columns)
 
-        train_data = self._transformer.transform(train_data)
+        train_data = self.transformer.transform(train_data)
 
         self._data_sampler = DataSampler(
             train_data,
-            self._transformer.output_info_list,
+            self.transformer.output_info_list,
             self._log_frequency)
 
-        data_dim = self._transformer.output_dimensions
+        data_dim = self.transformer.output_dimensions
 
         self._generator = Generator(
             self._embedding_dim + self._data_sampler.dim_cond_vec(),
@@ -407,7 +407,7 @@ class CTGANSynthesizer(BaseSynthesizer):
             numpy.ndarray or pandas.DataFrame
         """
         if condition_column is not None and condition_value is not None:
-            condition_info = self._transformer.convert_column_name_value_to_id(
+            condition_info = self.transformer.convert_column_name_value_to_id(
                 condition_column, condition_value)
             global_condition_vec = self._data_sampler.generate_cond_from_condition_column_info(
                 condition_info, self._batch_size)
@@ -440,7 +440,7 @@ class CTGANSynthesizer(BaseSynthesizer):
         data = np.concatenate(data, axis=0)
         data = data[:n]
 
-        return self._transformer.inverse_transform(data)
+        return self.transformer.inverse_transform(data)
 
     def set_device(self, device):
         self._device = device
